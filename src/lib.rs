@@ -1,3 +1,5 @@
 mod dir_indexer;
 
-pub use dir_indexer::say_hello;
+pub use dir_indexer::DirTreeNode;
+pub use dir_indexer::DirWalker;
+pub use dir_indexer::DisWalkerError;
