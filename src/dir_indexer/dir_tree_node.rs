@@ -4,13 +4,31 @@
 /// related to [`DirTreeNode`] and this is mostly used internally
 ///
 ///
-use std::{path::{Path, PathBuf}, ffi::OsString };
+use std::path::{Path, PathBuf};
+use std::ffi::OsString; 
+use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 
 /// Represents a directory tree node.
 pub struct DirTreeNode {
     entry_name: OsString,
     is_dir: bool,
-    child: Vec<DirTreeNode>
+    child: HashSet<DirTreeNode>
+}
+
+impl Eq for DirTreeNode {}
+
+impl PartialEq for DirTreeNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.entry_name == other.entry_name && self.is_dir == other.is_dir
+    }
+}
+
+impl Hash for DirTreeNode {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.entry_name.hash(state);
+        self.is_dir.hash(state)
+    }
 }
 
 impl DirTreeNode {
@@ -31,7 +49,7 @@ impl DirTreeNode {
            let mut new_node = DirTreeNode {
                entry_name: absolute_path.file_name().unwrap().into(),
                is_dir: true,
-               child: Vec::new()
+               child: HashSet::new()
            };
 
            new_node.update_child(absolute_path);
@@ -40,7 +58,7 @@ impl DirTreeNode {
        DirTreeNode { 
            entry_name: absolute_path.file_name().unwrap().into(), 
            is_dir: false, 
-           child: Vec::new() 
+           child: HashSet::new()
        }
    }
 
@@ -51,7 +69,7 @@ impl DirTreeNode {
            let entry = entry.unwrap();
            let path = entry.path();
 
-           self.child.push(DirTreeNode::new(&path))
+           self.child.insert(DirTreeNode::new(&path));
        }
    }
 

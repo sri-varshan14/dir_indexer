@@ -15,7 +15,7 @@ pub struct DirWalker {
     root_directory: OsString,
     tree: DirTreeNode,
     no_of_files: usize,
-    no_of_dirs: usize
+    no_of_dirs: usize,
 }
 
 impl DirWalker {
