@@ -1,5 +1,12 @@
-use std::{path::{Path, PathBuf}, ffi::OsString, str::FromStr };
+/// Node base structure to represent the directory structure
+///
+/// This module contains the [`DirTreeNode`] type and several methods 
+/// related to [`DirTreeNode`] and this is mostly used internally
+///
+///
+use std::{path::{Path, PathBuf}, ffi::OsString };
 
+/// Represents a directory tree node.
 pub struct DirTreeNode {
     entry_name: OsString,
     is_dir: bool,
@@ -7,6 +14,17 @@ pub struct DirTreeNode {
 }
 
 impl DirTreeNode {
+    /// Creates a new `DirTreeNode` for the given path.
+    ///
+    /// If the path represents a directory, the child nodes are recursively populated.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path for which to create the `DirTreeNode`.
+    ///
+    /// # Returns
+    ///
+    /// A `DirTreeNode` representing the specified path
    pub fn new(path: &Path) -> DirTreeNode {
        let absolute_path = path;
        if path.is_dir() { 
@@ -26,7 +44,8 @@ impl DirTreeNode {
        }
    }
 
-   pub fn update_child(&mut self, path: &Path){
+   // Updates the child nodes of the current node.
+   fn update_child(&mut self, path: &Path){
        let child_entries = path.read_dir().unwrap();
        for entry in child_entries {
            let entry = entry.unwrap();
@@ -36,6 +55,11 @@ impl DirTreeNode {
        }
    }
 
+   /// Prints the directory tree structure starting from the current node.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent_path` - The parent path used for displaying the tree structure.
    pub fn print(&self, parent_path: &OsString) {
        println!("{}",parent_path.to_str().unwrap());
        if self.is_dir {
@@ -52,6 +76,12 @@ impl DirTreeNode {
             
    }
 
+    /// Prints the file paths within the directory tree structure starting
+    /// from the current node.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent_path` - The parent path used for displaying the file paths.
    pub fn print_files(&self, parent_path: &OsString) {
        if self.is_dir {
             for entry in &self.child {
@@ -68,6 +98,14 @@ impl DirTreeNode {
            println!("{}",parent_path.to_str().unwrap());
        }
    }
+   
+    /// Pushes the file paths within the directory tree structure 
+    /// into the specified vector.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent_path` - The parent path used for building the file paths.
+    /// * `vec` - The vector to which the file paths will be pushed.
 
    pub fn push_file_paths(&self,parent_path: &OsString, vec:&mut  Vec<PathBuf>) {
        if self.is_dir {
@@ -84,5 +122,47 @@ impl DirTreeNode {
        else {
            vec.push(PathBuf::from(parent_path.to_str().unwrap()));
        }
+   }
+
+   
+    /// Retrieves the total number of files within the directory tree structure
+    /// starting from the current node.
+    ///
+    /// # Returns
+    ///
+    /// The total number of files.
+   pub fn get_number_of_files(&self) -> usize {
+        if self.is_dir {
+            let mut count_sub_files: usize = 0;
+            for entry in &self.child {
+                if entry.is_dir {
+                    count_sub_files += entry.get_number_of_files()
+                }
+                else {
+                    count_sub_files+=1;
+                }
+            }
+            return count_sub_files;
+        }
+        else {
+            return 1 as usize;
+        }
+   }
+
+    /// Retrieves the total number of directories within the directory tree
+    /// structure starting from the current node.
+    ///
+    /// # Returns
+    ///
+    /// The total number of directories.
+   pub fn get_number_of_dirs(&self) -> usize {
+       let mut count_dirs: usize = 0;
+       if self.is_dir {
+           count_dirs+=1;
+           for entry in &self.child {
+               count_dirs += entry.get_number_of_dirs();
+           }
+       }
+       return count_dirs
    }
 }

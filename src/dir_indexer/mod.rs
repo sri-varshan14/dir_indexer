@@ -4,4 +4,4 @@ mod error;
 
 pub use dir_tree_node::DirTreeNode;
 pub use dir_walker::DirWalker;
-pub use error::DisWalkerError;
+pub use error::DirWalkerError;
