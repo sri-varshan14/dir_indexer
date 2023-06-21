@@ -7,8 +7,7 @@
 use crate::DirTreeNode;
 use crate::DirWalkerError;
 use std::ffi::OsString;
-use std::path::PathBuf;
-use std::path::Path;
+use std::path::{Path,PathBuf};
 
 /// Provides a directory walker to traverse and analyze directory structures.
 pub struct DirWalker {
@@ -68,6 +67,18 @@ impl DirWalker {
         let mut file_vec = Vec::new();
         self.tree.push_file_paths(&OsString::new(),&mut file_vec);
         file_vec
+    }
+
+    /// Retrieves a list of directory paths within the directory tree structure
+    /// starting from the root directory.
+    ///
+    /// # Returns
+    ///
+    /// A vector containing the directory paths.
+    pub fn directory_list(&self) -> Vec<PathBuf> {
+        let mut dir_vec = Vec::new();
+        self.tree.push_dir_paths(&OsString::new(),&mut dir_vec);
+        dir_vec
     }
 
     /// Updates the count of files within the directory tree structure.

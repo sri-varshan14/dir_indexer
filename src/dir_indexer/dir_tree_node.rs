@@ -142,6 +142,29 @@ impl DirTreeNode {
        }
    }
 
+    /// Pushes the directory paths within the directory tree structure 
+    /// into the specified vector.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent_path` - The parent path used for building the directory paths.
+    /// * `vec` - The vector to which the directory paths will be pushed.
+
+   pub fn push_dir_paths(&self,parent_path: &OsString, vec:&mut  Vec<PathBuf>) {
+       if self.is_dir {
+           let cur_dir_path = OsString::from( 
+               format!(
+                   "{}/{}",
+                   parent_path.to_str().unwrap(),
+                   self.entry_name.to_str().unwrap()
+                ));
+            vec.push(PathBuf::from(cur_dir_path.clone()));
+            for entry in &self.child {
+                entry.push_dir_paths(&cur_dir_path,vec);
+            }
+       }
+   }
+
    
     /// Retrieves the total number of files within the directory tree structure
     /// starting from the current node.
