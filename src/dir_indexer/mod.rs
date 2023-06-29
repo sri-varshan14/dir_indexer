@@ -1,7 +1,8 @@
-mod dir_walker;
-mod dir_tree_node;
-mod error;
+mod dir_indexer;
+mod dir_tree;
+mod dir_node;
+mod utils;
 
-pub use dir_tree_node::DirTreeNode;
-pub use dir_walker::DirWalker;
-pub use error::DirWalkerError;
+pub use dir_indexer::DirIndexer;
+pub use dir_tree::DirTree;
+pub use dir_node::DirNode;
