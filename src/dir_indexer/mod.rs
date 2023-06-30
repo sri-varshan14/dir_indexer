@@ -6,3 +6,8 @@ mod utils;
 pub use dir_indexer::DirIndexer;
 pub use dir_tree::DirTree;
 pub use dir_node::DirNode;
+
+pub use utils::get_relative_file_paths_set;
+pub use utils::get_absolute_file_paths_set;
+pub use utils::get_ab2rl_file_paths_map;
+pub use utils::get_rl2ab_file_paths_map;
