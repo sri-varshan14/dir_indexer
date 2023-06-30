@@ -86,5 +86,3 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 For any inquiries or questions, feel free to contact the project maintainer at [mailmeatsri14@gmail.com](mailto:mailmeatsri14@gmail.com).
 
 ---
-
-Feel free to customize the README file further based on your specific project details, including additional sections or relevant information.

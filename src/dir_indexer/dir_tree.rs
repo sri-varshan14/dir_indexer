@@ -21,8 +21,10 @@ impl DirTree {
     ///
     /// A `DirTree` instance.
     pub fn from(ab_path: &PathBuf) -> DirTree {
-        let relative_start = PathBuf::from("./");
-        let node = DirNode::from(ab_path, &relative_start).unwrap();
+        let relative_start = PathBuf::from("");
+        let node = DirNode::from(ab_path, &relative_start).unwrap(); // May be I need to conside to
+                                                                     // handle this function but
+                                                                     // lets this in future
         DirTree { root_node_: node }
     }
 

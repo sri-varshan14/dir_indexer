@@ -2,10 +2,12 @@ mod dir_indexer;
 mod dir_tree;
 mod dir_node;
 mod utils;
+mod dir_indexer_err;
 
 pub use dir_indexer::DirIndexer;
 pub use dir_tree::DirTree;
 pub use dir_node::DirNode;
+pub use dir_indexer_err::DirIndexerErr;
 
 pub use utils::get_relative_file_paths_set;
 pub use utils::get_absolute_file_paths_set;

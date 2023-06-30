@@ -1,4 +1,4 @@
-use super::DirTree;
+use super::{DirTree, DirIndexerErr};
 use std::fs;
 use std::path::PathBuf;
 use std::collections::{HashSet, HashMap};
@@ -23,19 +23,27 @@ impl DirIndexer {
     ///
     /// An `Option` containing the `DirIndexer` instance if the root path exists and is a directory,
     /// or `None` otherwise.
-    pub fn from(root_path: PathBuf) -> Option<DirIndexer> {
+    pub fn from(root_path: PathBuf) -> Result<DirIndexer,DirIndexerErr> {
         if root_path.exists() && root_path.is_dir() {
-            let ab_path = root_path.clone();
+            let mut ab_path = root_path.clone();
             if root_path.is_relative() {
-                let ab_path = fs::canonicalize(root_path).expect("Failed to get absolute path.");
+                let con_result = fs::canonicalize(root_path.clone());
+                if con_result.is_err() {
+                    return Err(DirIndexerErr::CanonicalizeFail(root_path));
+                }
+                else {
+                    ab_path = con_result.unwrap(); // No Problem in wrap, I did handle the err
+                                                   // before it self
+                }
             }
             let dir_tree = DirTree::from(&ab_path);
-            Some(DirIndexer {
+            Ok(DirIndexer {
                 root_path_: ab_path,
                 root_tree_: dir_tree,
             })
-        } else {
-            None
+        } 
+        else {
+            Err(DirIndexerErr::NotDirNorExist(root_path))
         }
     }
 

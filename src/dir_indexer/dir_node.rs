@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use std::collections::{HashSet, HashMap};
 use std::hash::{Hash, Hasher};
 
+use super::DirIndexerErr;
+
 /// Represents a directory node in the directory tree.
 #[derive(Debug, PartialEq)]
 pub struct DirNode {
@@ -21,12 +23,22 @@ impl DirNode {
     /// # Returns
     ///
     /// An `Option` containing the `DirNode` instance if successful, or `None` if the path does not exist or is not a directory.
-    pub fn from(root_path: &PathBuf, rl_path: &PathBuf) -> Option<DirNode> {
+    pub fn from(root_path: &PathBuf, rl_path: &PathBuf) -> Result<DirNode, DirIndexerErr> {
         let joined_path = root_path.join(rl_path);
         if !joined_path.is_file() && !joined_path.is_dir() {
-            return None;
+            return Err(DirIndexerErr::NotFileAndDir);
         }
-        let ab_path_entry = fs::canonicalize(joined_path.to_str().unwrap()).unwrap();
+        
+        let mut ab_path_entry: PathBuf = PathBuf::new(); 
+        let to_str_res = joined_path.to_str();
+
+        if to_str_res.is_some() {
+            let con_result = fs::canonicalize(to_str_res.unwrap());
+            if con_result.is_ok() {
+                ab_path_entry = con_result.unwrap();
+            }
+        }
+
         let mut dir_node = DirNode {
             entry_: rl_path.to_path_buf(),
             child_entry_: HashSet::new(),
@@ -40,16 +52,17 @@ impl DirNode {
                         let new_entry = rl_path.join(entry_name);
                         let child_entry = DirNode::from(root_path, &new_entry);
 
-                        if let Some(a) = child_entry {
+                        if let Ok(a) = child_entry {
                             dir_node.child_entry_.insert(a);
                         }
                     }
                 }
-            } else {
-                println!("Failed to read directory: {:?}", ab_path_entry);
+            } 
+            else {
+                return Err(DirIndexerErr::LackPermission(ab_path_entry));
             }
         }
-        Some(dir_node)
+        Ok(dir_node)
     }
 
     /// Adds relative file paths of the directory node and its children to the provided set.
@@ -59,13 +72,16 @@ impl DirNode {
     /// * `root_path` - The root path of the directory tree.
     /// * `set` - The `HashSet` to store the relative file paths.
     pub fn add_rl_file_path(&self, root_path: &PathBuf, set: &mut HashSet<PathBuf>) {
-        let ab_path = fs::canonicalize(root_path.clone().join(self.entry_.clone())).unwrap();
-        if ab_path.is_file() {
-            set.insert(self.entry_.clone());
-        }
-        if ab_path.is_dir() {
-            for child in &self.child_entry_ {
-                child.add_rl_file_path(&root_path, set);
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_file() {
+                set.insert(self.entry_.clone());
+            }
+            if ab_path.is_dir() {
+                for child in &self.child_entry_ {
+                    child.add_rl_file_path(&root_path, set);
+                }
             }
         }
     }
@@ -77,13 +93,16 @@ impl DirNode {
     /// * `root_path` - The root path of the directory tree.
     /// * `set` - The `HashSet` to store the absolute file paths.
     pub fn add_ab_file_path(&self, root_path: &PathBuf, set: &mut HashSet<PathBuf>) {
-        let ab_path = fs::canonicalize(root_path.clone().join(self.entry_.clone())).unwrap();
-        if ab_path.is_file() {
-            set.insert(ab_path.clone());
-        }
-        if ab_path.is_dir() {
-            for child in &self.child_entry_ {
-                child.add_ab_file_path(&root_path, set);
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_file() {
+                set.insert(ab_path.clone());
+            }
+            if ab_path.is_dir() {
+                for child in &self.child_entry_ {
+                    child.add_ab_file_path(&root_path, set);
+                }
             }
         }
     }
@@ -95,13 +114,16 @@ impl DirNode {
     /// * `root_path` - The root path of the directory tree.
     /// * `map` - The `HashMap` to store the mapping of absolute file paths to relative file paths.
     pub fn map_ab2rl_file_path(&self, root_path: &PathBuf, map: &mut HashMap<PathBuf, PathBuf>) {
-        let ab_path = fs::canonicalize(root_path.clone().join(self.entry_.clone())).unwrap();
-        if ab_path.is_file() {
-            map.insert(ab_path.clone(), self.entry_.clone());
-        }
-        if ab_path.is_dir() {
-            for child in &self.child_entry_ {
-                child.map_ab2rl_file_path(&root_path, map);
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_file() {
+                map.insert(ab_path.clone(), self.entry_.clone());
+            }
+            if ab_path.is_dir() {
+                for child in &self.child_entry_ {
+                    child.map_ab2rl_file_path(&root_path, map);
+                }
             }
         }
     }
@@ -113,13 +135,16 @@ impl DirNode {
     /// * `root_path` - The root path of the directory tree.
     /// * `map` - The `HashMap` to store the mapping of relative file paths to absolute file paths.
     pub fn map_rl2ab_file_path(&self, root_path: &PathBuf, map: &mut HashMap<PathBuf, PathBuf>) {
-        let ab_path = fs::canonicalize(root_path.clone().join(self.entry_.clone())).unwrap();
-        if ab_path.is_file() {
-            map.insert(self.entry_.clone(), ab_path.clone());
-        }
-        if ab_path.is_dir() {
-            for child in &self.child_entry_ {
-                child.map_ab2rl_file_path(&root_path, map);
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_file() {
+                map.insert(self.entry_.clone(), ab_path.clone());
+            }
+            if ab_path.is_dir() {
+                for child in &self.child_entry_ {
+                    child.map_ab2rl_file_path(&root_path, map);
+                }
             }
         }
     }
@@ -141,7 +166,7 @@ impl DirNode {
     pub fn absolute_entry_name(self, root_path: PathBuf) -> PathBuf {
         let joined_path = root_path.join(self.entry_);
         let ab_path_entry = fs::canonicalize(joined_path.to_str().unwrap()).unwrap();
-        ab_path_entry
+        return ab_path_entry;
     }
 }
 
