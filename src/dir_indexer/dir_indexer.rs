@@ -1,7 +1,7 @@
-use std::collections::HashSet;
-use std::fs;
-use std::path::{Path, PathBuf};
 use super::DirTree;
+use std::fs;
+use std::path::PathBuf;
+use std::collections::{HashSet, HashMap};
 
 
 #[derive(Debug)]
@@ -36,5 +36,13 @@ impl DirIndexer {
 
     pub fn get_absolute_file_pathss_set(&self) -> HashSet<PathBuf> {
         self.root_tree_.get_absolute_file_paths(&self.root_path_)
+    }
+
+    pub fn get_rl2ab_file_paths_map(&self) -> HashMap<PathBuf,PathBuf> {
+        self.root_tree_.get_rl2ab_file_paths(&self.root_path_)
+    }
+
+    pub fn get_ab2rl_file_paths_map(&self) -> HashMap<PathBuf,PathBuf> {
+        self.root_tree_.get_ab2rl_file_paths(&self.root_path_)
     }
 }
