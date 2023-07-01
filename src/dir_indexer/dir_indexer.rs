@@ -1,4 +1,4 @@
-use super::DirTree;
+use super::{DirTree, DirIndexerErr};
 use std::fs;
 use std::path::PathBuf;
 use std::collections::{HashSet, HashMap};
@@ -21,21 +21,26 @@ impl DirIndexer {
     ///
     /// # Returns
     ///
-    /// An `Option` containing the `DirIndexer` instance if the root path exists and is a directory,
-    /// or `None` otherwise.
-    pub fn from(root_path: PathBuf) -> Option<DirIndexer> {
+    /// An `Result` containing the `DirIndexer` instance if the root path exists and is a directory,
+    /// or an `Err` variant of `DirIndexerErr` otherwise.
+    pub fn from(root_path: PathBuf) -> Result<DirIndexer, DirIndexerErr> {
         if root_path.exists() && root_path.is_dir() {
-            let ab_path = root_path.clone();
+            let mut ab_path = root_path.clone();
             if root_path.is_relative() {
-                let ab_path = fs::canonicalize(root_path).expect("Failed to get absolute path.");
+                let con_result = fs::canonicalize(root_path.clone());
+                if con_result.is_err() {
+                    return Err(DirIndexerErr::CanonicalizeFail(root_path));
+                } else {
+                    ab_path = con_result.unwrap();
+                }
             }
             let dir_tree = DirTree::from(&ab_path);
-            Some(DirIndexer {
+            Ok(DirIndexer {
                 root_path_: ab_path,
                 root_tree_: dir_tree,
             })
         } else {
-            None
+            Err(DirIndexerErr::NotDirNorExist(root_path))
         }
     }
 
@@ -48,13 +53,31 @@ impl DirIndexer {
         self.root_tree_.get_relative_file_paths(&self.root_path_)
     }
 
+    /// Retrieves a set of relative directory paths within the indexed directory and its subdirectories.
+    ///
+    /// # Returns
+    ///
+    /// A `HashSet` containing the relative directory paths as `PathBuf` values.
+    pub fn get_relative_dir_paths_set(&self) -> HashSet<PathBuf> {
+        self.root_tree_.get_relative_dir_paths(&self.root_path_)
+    }
+
     /// Retrieves a set of absolute file paths within the indexed directory and its subdirectories.
     ///
     /// # Returns
     ///
     /// A `HashSet` containing the absolute file paths as `PathBuf` values.
-    pub fn get_absolute_file_pathss_set(&self) -> HashSet<PathBuf> {
+    pub fn get_absolute_file_paths_set(&self) -> HashSet<PathBuf> {
         self.root_tree_.get_absolute_file_paths(&self.root_path_)
+    }
+
+    /// Retrieves a set of absolute directory paths within the indexed directory and its subdirectories.
+    ///
+    /// # Returns
+    ///
+    /// A `HashSet` containing the absolute directory paths as `PathBuf` values.
+    pub fn get_absolute_dir_paths_set(&self) -> HashSet<PathBuf> {
+        self.root_tree_.get_absolute_dir_paths(&self.root_path_)
     }
 
     /// Retrieves a mapping between relative and absolute file paths within the indexed directory and its subdirectories.
@@ -66,6 +89,15 @@ impl DirIndexer {
         self.root_tree_.get_rl2ab_file_paths(&self.root_path_)
     }
 
+    /// Retrieves a mapping between relative and absolute directory paths within the indexed directory and its subdirectories.
+    ///
+    /// # Returns
+    ///
+    /// A `HashMap` containing the relative directory paths as keys and their corresponding absolute directory paths as values.
+    pub fn get_rl2ab_dir_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
+        self.root_tree_.get_rl2ab_dir_paths(&self.root_path_)
+    }
+
     /// Retrieves a mapping between absolute and relative file paths within the indexed directory and its subdirectories.
     ///
     /// # Returns
@@ -73,6 +105,15 @@ impl DirIndexer {
     /// A `HashMap` containing the absolute file paths as keys and their corresponding relative file paths as values.
     pub fn get_ab2rl_file_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
         self.root_tree_.get_ab2rl_file_paths(&self.root_path_)
+    }
+
+    /// Retrieves a mapping between absolute and relative directory paths within the indexed directory and its subdirectories.
+    ///
+    /// # Returns
+    ///
+    /// A `HashMap` containing the absolute directory paths as keys and their corresponding relative directory paths as values.
+    pub fn get_ab2rl_dir_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
+        self.root_tree_.get_ab2rl_dir_paths(&self.root_path_)
     }
 }
 
