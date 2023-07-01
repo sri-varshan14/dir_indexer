@@ -86,6 +86,19 @@ impl DirNode {
         }
     }
 
+    pub fn add_rl_dir_path(&self, root_path: &PathBuf, set: &mut HashSet<PathBuf>) {
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_dir() {
+                set.insert(self.entry_.clone());
+                for child in &self.child_entry_ {
+                    child.add_rl_dir_path(&root_path, set);
+                }
+            }
+        }
+    }
+
     /// Adds absolute file paths of the directory node and its children to the provided set.
     ///
     /// # Arguments
@@ -102,6 +115,19 @@ impl DirNode {
             if ab_path.is_dir() {
                 for child in &self.child_entry_ {
                     child.add_ab_file_path(&root_path, set);
+                }
+            }
+        }
+    }
+
+    pub fn add_ab_dir_path(&self, root_path: &PathBuf, set: &mut HashSet<PathBuf>) {
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_dir() {
+                set.insert(ab_path.clone());
+                for child in &self.child_entry_ {
+                    child.add_ab_dir_path(&root_path, set);
                 }
             }
         }
@@ -128,6 +154,19 @@ impl DirNode {
         }
     }
 
+    pub fn map_ab2rl_dir_path(&self, root_path: &PathBuf, map: &mut HashMap<PathBuf, PathBuf>) {
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_dir() {
+                map.insert(ab_path.clone(), self.entry_.clone());
+                for child in &self.child_entry_ {
+                    child.map_ab2rl_dir_path(&root_path, map);
+                }
+            }
+        }
+    }
+
     /// Maps relative file paths to absolute file paths for the directory node and its children.
     ///
     /// # Arguments
@@ -144,6 +183,21 @@ impl DirNode {
             if ab_path.is_dir() {
                 for child in &self.child_entry_ {
                     child.map_ab2rl_file_path(&root_path, map);
+                }
+            }
+        }
+    }
+
+    pub fn map_rl2ab_dir_path(&self, root_path: &PathBuf, map: &mut HashMap<PathBuf, PathBuf>) {
+        let ab_path_res = fs::canonicalize(root_path.clone().join(self.entry_.clone()));
+        if ab_path_res.is_ok() {
+            let ab_path = ab_path_res.unwrap();
+            if ab_path.is_file() {
+                map.insert(self.entry_.clone(), ab_path.clone());
+            }
+            if ab_path.is_dir() {
+                for child in &self.child_entry_ {
+                    child.map_ab2rl_dir_path(&root_path, map);
                 }
             }
         }

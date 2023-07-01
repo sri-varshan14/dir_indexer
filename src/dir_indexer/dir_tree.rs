@@ -43,6 +43,12 @@ impl DirTree {
         path_set
     }
 
+    pub fn get_relative_dir_paths(&self, root_path: &PathBuf) -> HashSet<PathBuf> {
+        let mut path_set: HashSet<PathBuf> = HashSet::new();
+        self.root_node_.add_rl_dir_path(&root_path, &mut path_set);
+        path_set
+    }
+
     /// Retrieves a set of absolute file paths within the directory tree.
     ///
     /// # Arguments
@@ -58,8 +64,14 @@ impl DirTree {
         path_set
     }
 
+    pub fn get_absolute_dir_paths(&self, root_path: &PathBuf) -> HashSet<PathBuf> {
+        let mut path_set: HashSet<PathBuf> = HashSet::new();
+        self.root_node_.add_ab_dir_path(root_path, &mut path_set);
+        path_set
+    }
+
     /// Retrieves a mapping between relative and absolute file paths within the directory tree.
-    ///
+    ///tree
     /// # Arguments
     ///
     /// * `root_path` - The root path of the directory tree.
@@ -73,6 +85,11 @@ impl DirTree {
         path_map
     }
 
+    pub fn get_rl2ab_dir_paths(&self, root_path: &PathBuf) -> HashMap<PathBuf, PathBuf> {
+        let mut path_map: HashMap<PathBuf, PathBuf> = HashMap::new();
+        self.root_node_.map_rl2ab_dir_path(root_path, &mut path_map);
+        path_map
+    }
     /// Retrieves a mapping between absolute and relative file paths within the directory tree.
     ///
     /// # Arguments
@@ -85,6 +102,12 @@ impl DirTree {
     pub fn get_ab2rl_file_paths(&self, root_path: &PathBuf) -> HashMap<PathBuf, PathBuf> {
         let mut path_map: HashMap<PathBuf, PathBuf> = HashMap::new();
         self.root_node_.map_ab2rl_file_path(root_path, &mut path_map);
+        path_map
+    }
+
+    pub fn get_ab2rl_dir_paths(&self, root_path: &PathBuf) -> HashMap<PathBuf, PathBuf> {
+        let mut path_map: HashMap<PathBuf, PathBuf> = HashMap::new();
+        self.root_node_.map_ab2rl_dir_path(root_path, &mut path_map);
         path_map
     }
 }

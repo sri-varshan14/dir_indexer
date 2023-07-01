@@ -56,15 +56,22 @@ impl DirIndexer {
         self.root_tree_.get_relative_file_paths(&self.root_path_)
     }
 
+    pub fn get_relative_dir_paths_set(&self) -> HashSet<PathBuf> {
+        self.root_tree_.get_relative_dir_paths(&self.root_path_)
+    }
+
     /// Retrieves a set of absolute file paths within the indexed directory and its subdirectories.
     ///
     /// # Returns
     ///
     /// A `HashSet` containing the absolute file paths as `PathBuf` values.
-    pub fn get_absolute_file_pathss_set(&self) -> HashSet<PathBuf> {
+    pub fn get_absolute_file_paths_set(&self) -> HashSet<PathBuf> {
         self.root_tree_.get_absolute_file_paths(&self.root_path_)
     }
 
+    pub fn get_absolute_dir_paths_set(&self) -> HashSet<PathBuf> {
+        self.root_tree_.get_absolute_dir_paths(&self.root_path_)
+    }
     /// Retrieves a mapping between relative and absolute file paths within the indexed directory and its subdirectories.
     ///
     /// # Returns
@@ -74,6 +81,9 @@ impl DirIndexer {
         self.root_tree_.get_rl2ab_file_paths(&self.root_path_)
     }
 
+    pub fn get_rl2ab_dir_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
+        self.root_tree_.get_rl2ab_dir_paths(&self.root_path_)
+    }
     /// Retrieves a mapping between absolute and relative file paths within the indexed directory and its subdirectories.
     ///
     /// # Returns
@@ -81,6 +91,10 @@ impl DirIndexer {
     /// A `HashMap` containing the absolute file paths as keys and their corresponding relative file paths as values.
     pub fn get_ab2rl_file_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
         self.root_tree_.get_ab2rl_file_paths(&self.root_path_)
+    }
+
+    pub fn get_ab2rl_dir_paths_map(&self) -> HashMap<PathBuf, PathBuf> {
+        self.root_tree_.get_ab2rl_dir_paths(&self.root_path_)
     }
 }
 
