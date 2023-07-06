@@ -9,12 +9,12 @@ fn main() {
         println!("{} -> {}", k.to_str().unwrap(), v.to_str().unwrap());
     }
     println!("");
-    for v in dir_indexer::get_absolute_file_paths_set(path.clone()) {
-        println!("{}", v.to_str().unwrap());
-    }
-    println!("");
     for (k,v) in dir_indexer::get_rl2ab_file_paths_map(path.clone()) {
         println!("{} -> {}", k.to_str().unwrap(), v.to_str().unwrap());
+    }
+    println!("");
+    for v in dir_indexer::get_absolute_file_paths_set(path.clone()) {
+        println!("{}", v.to_str().unwrap());
     }
     println!("");
     for v in dir_indexer::get_relative_file_paths_set(path.clone()) {
