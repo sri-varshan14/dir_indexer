@@ -195,7 +195,7 @@ impl DirNode {
             }
             if ab_path.is_dir() {
                 for child in &self.child_entry_ {
-                    child.map_ab2rl_file_path(root_path, map);
+                    child.map_rl2ab_file_path(root_path, map);
                 }
             }
         }
